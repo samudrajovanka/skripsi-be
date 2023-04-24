@@ -35,5 +35,5 @@ exports.addParticipantNewMahasiswaSchema = Joi.object({
 });
 
 exports.uploadFileParticipantSchema = Joi.object({
-  kriteriaId: Joi.string().required()
+  berkasId: Joi.string().required()
 });

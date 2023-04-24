@@ -80,17 +80,15 @@ class PesertaService {
       throw new NotFoundError('Peserta tidak ditemukan');
     }
 
-    const oldFilterData = participant.data.filter((item) => item.kriteria != data.kriteriaId);
+    const oldFilterData = participant.files.filter((item) => item.berkas != data.berkasId);
 
     const newData = {
-      kriteria: data.kriteriaId,
-      file: {
-        name: data.file.name,
-        url: data.file.url,
-      },
+      berkas: data.berkasId,
+      name: data.name,
+      url: data.url,
     };
 
-    participant.data = [...oldFilterData, newData];
+    participant.files = [...oldFilterData, newData];
 
     await participant.save();
   }

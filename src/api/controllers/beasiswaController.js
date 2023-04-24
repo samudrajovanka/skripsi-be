@@ -201,9 +201,9 @@ exports.uploadFile = async (req, res) => {
 
     const beasiswaService = new BeasiswaService();
 
-    const { kriteriaId } = req.body;
+    const { berkasId } = req.body;
     
-    await beasiswaService.uploadFile(id, mahasiswaId, req.file, kriteriaId);
+    await beasiswaService.uploadFile(id, mahasiswaId, req.file, berkasId);
 
     return res.status(200).json({
       success: true,

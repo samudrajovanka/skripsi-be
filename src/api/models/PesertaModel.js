@@ -19,21 +19,30 @@ const PesertaSchema = new BaseSchema(
         kriteria: {
           type: BaseSchema.Types.ObjectId,
           ref: 'Kriteria',
+          required: true,
         },
         parameter: {
           type: BaseSchema.Types.ObjectId,
-          ref: 'Parameter'
+          ref: 'Parameter',
+          required: true,
+        }
+      }
+    ],
+    files: [
+      {
+        berkas: {
+          type: BaseSchema.Types.ObjectId,
+          ref: 'Berkas',
+          required: true,
         },
-        file: {
-          name: {
-            type: String,
-            required: true,
-          },
-          url: {
-            type: String,
-            required: true,
-          },
+        name: {
+          type: String,
+          required: true,
         },
+        url: {
+          type: String,
+          required: true,
+        }
       }
     ]
   }

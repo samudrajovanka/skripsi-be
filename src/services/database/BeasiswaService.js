@@ -131,25 +131,26 @@ class BeasiswaService {
     await pesertaService.deleteParticipantBeasiswa(beasiswaId, username);
   }
 
-  async uploadFile(beasiswaId, mahasiswaId, file, kriteriaId) {
+  async uploadFile(beasiswaId, mahasiswaId, file, berkasId) {
     await this.checkExistById(beasiswaId);
     await this.checkClosedBeasiswa(beasiswaId);
 
     // upload file to firebase
     const firebaseStorageService = new FirebaseStorageService();
-    const { url, fileName } = await firebaseStorageService.uploadFile(file, { folderName: mahasiswaId });
+    const { url, fileName } = await firebaseStorageService.uploadFile(
+      file,
+      { folderName: `${beasiswaId}/${mahasiswaId}` }
+    );
 
     const pesertaService = new PesertaService();
 
-    const data = {
-      kriteriaId,
-      file: {
-        url,
-        name: fileName
-      }
+    const fileData = {
+      berkasId,
+      url,
+      name: fileName
     }
 
-    await pesertaService.addFileToParticipant(beasiswaId, mahasiswaId, data);
+    await pesertaService.addFileToParticipant(beasiswaId, mahasiswaId, fileData);
   }
 }
 
