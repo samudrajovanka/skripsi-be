@@ -3,7 +3,8 @@ const ParameterModel = require("../../api/models/ParameterModel");
 class ParameterService {
   async getAllParameterByKriteria(kriteriaId) {
     const parameters = await ParameterModel.find({ kriteria: kriteriaId })
-      .sort({ certaintyValue: 1 });
+      .sort({ certaintyValue: 1 })
+      .select("-kriteria");
 
     return parameters;
   }

@@ -16,16 +16,9 @@ const PesertaSchema = new BaseSchema(
     },
     data: [
       {
-        kriteria: {
-          type: BaseSchema.Types.ObjectId,
-          ref: 'Kriteria',
-          required: true,
-        },
-        parameter: {
-          type: BaseSchema.Types.ObjectId,
-          ref: 'Parameter',
-          required: true,
-        }
+        type: BaseSchema.Types.ObjectId,
+        ref: 'Parameter',
+        required: true,
       }
     ],
     files: [

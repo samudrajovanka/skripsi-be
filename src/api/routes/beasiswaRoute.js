@@ -42,5 +42,17 @@ router.post(
   upload('pdf')('single', 'file'),
   beasiswaController.uploadFile
 );
+router.get(
+  '/:id/peserta/:username',
+  authentication,
+  authorization(['admin', 'verifikator', 'penilai']),
+  beasiswaController.getParticipantByUsername
+);
+router.post(
+  '/:id/peserta/:username/nilai',
+  authentication,
+  authorization(['penilai']),
+  beasiswaController.addDataValue
+);
 
 module.exports = router;

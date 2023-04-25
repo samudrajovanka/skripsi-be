@@ -29,9 +29,20 @@ class PesertaService {
   }
 
   async getByBeasiswaId(beasiswaId) {
-    const participants = await PesertaModel.find({ beasiswa: beasiswaId });
+    const participants = await PesertaModel.find({ beasiswa: beasiswaId })
+      .sort({ createdAt: -1 })
+      .populate('mahasiswa')
+      .select('-beasiswa');
 
-    return participants;
+    const finalParticipant = participants.map((participant) => {
+      const participantJson = participant.toJSON();
+
+      delete participantJson.mahasiswa.password;
+
+      return participantJson;
+    });
+
+    return finalParticipant;
   }
 
   async deleteManyByBeasiswaId(beasiswaId) {
@@ -45,18 +56,24 @@ class PesertaService {
   }
 
   async getParticipantByUsername(beasiswaId, username) {
-    const participant = await PesertaModel.findOne({ beasiswa: beasiswaId })
-      .populate('mahasiswa');
+    const participantOnScholarship = await PesertaModel.find({
+      beasiswa: beasiswaId,
+    })
+    .populate("mahasiswa data")
+    .select('-beasiswa');
+
+    const participant = participantOnScholarship.filter(
+      (participant) => participant.mahasiswa.username === username
+    )[0];
 
     if (!participant) {
       throw new NotFoundError('Peserta tidak ditemukan');
     }
 
-    if (participant.mahasiswa.username !== username) {
-      throw new NotFoundError('Peserta tidak ditemukan');
-    }
+    const finalParticipant = participant.toJSON();
+    delete finalParticipant.mahasiswa.password;
 
-    return participant;
+    return finalParticipant;
   }
 
   async getBeasiswaByMahasiswaId(mahasiswaId) {

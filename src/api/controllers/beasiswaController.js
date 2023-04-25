@@ -1,4 +1,6 @@
 const BeasiswaService = require('../../services/database/BeasiswaService');
+const PenilaiService = require('../../services/database/PenilaiService');
+const PesertaService = require('../../services/database/PesertaService');
 const { errorRes } = require('../../utils/errorResponse');
 const beasiswaValidation = require('../../validations/beasiswa');
 
@@ -213,3 +215,42 @@ exports.uploadFile = async (req, res) => {
     return errorRes(res, error);
   }
 };
+
+exports.getParticipantByUsername = async (req, res) => {
+  try {
+    const { id, username } = req.params;
+
+    const pesertaService = new PesertaService();
+
+    const participant = await pesertaService.getParticipantByUsername(id, username);
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mendapatkan peserta beasiswa",
+      data: {
+        peserta: participant
+      }
+    })
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}
+
+exports.addDataValue = async (req, res) => {
+  try {
+    beasiswaValidation.validateAddDataValueParticipant(req.body);
+
+    const { id, username } = req.params;
+
+    const penilaiService = new PenilaiService();
+
+    const participant = await penilaiService.add(id, username, req.body);
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil memasukkan nilai peserta beasiswa"
+    })
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}

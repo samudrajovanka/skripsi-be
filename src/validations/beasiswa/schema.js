@@ -37,3 +37,10 @@ exports.addParticipantNewMahasiswaSchema = Joi.object({
 exports.uploadFileParticipantSchema = Joi.object({
   berkasId: Joi.string().required()
 });
+
+exports.addDataValue = Joi.object({
+  data: Joi.array().items(Joi.object({
+    kriteriaId: Joi.string().required(),
+    parameterId: Joi.string().required()
+  })).required()
+});

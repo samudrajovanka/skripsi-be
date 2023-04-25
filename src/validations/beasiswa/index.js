@@ -6,7 +6,8 @@ const {
   updateBeasiswaSchema,
   addParticipantNewMahasiswaSchema,
   addParticipantExistMahasiswaSchema,
-  uploadFileParticipantSchema
+  uploadFileParticipantSchema,
+  addDataValue
 } = require('./schema');
 
 const beasiswaValidation = {
@@ -40,6 +41,13 @@ const beasiswaValidation = {
   },
   validateUploadFileParticipant: (payload) => {
     const validationResult = uploadFileParticipantSchema.validate(payload);
+
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message, VALIDATION_ERR);
+    }
+  },
+  validateAddDataValueParticipant: (payload) => {
+    const validationResult = addDataValue.validate(payload);
 
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message, VALIDATION_ERR);
