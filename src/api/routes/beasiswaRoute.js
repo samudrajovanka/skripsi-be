@@ -10,6 +10,7 @@ router.get('/', authentication, beasiswaController.getAll);
 router.post('/', authentication, authorization(['admin']), beasiswaController.create);
 router.get('/:id', authentication, beasiswaController.getById);
 router.put('/:id', authentication, authorization(['admin']), beasiswaController.update);
+router.put('/:id/lock', authentication, authorization(['admin']), beasiswaController.updateLockBeasiswa);
 router.delete('/:id', authentication, authorization(['admin']), beasiswaController.delete);
 router.post(
   '/:id/peserta',

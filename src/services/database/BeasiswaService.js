@@ -184,6 +184,11 @@ class BeasiswaService {
   async verifikatorGiveScore(username, idVerifikator, beasiswaId, { score }) {
     await this.checkExistById(beasiswaId);
 
+    const isLocked = await this.checkBeasiswaIsLocked(beasiswaId);
+    if (isLocked) {
+      throw new InvariantError('Beasiswa sudah dikunci, tidak bisa memberikan nilai');
+    }
+
     const mahasiswaService = new MahasiswaService();
     const mahasiswa = await mahasiswaService.getByUsername(username);
 
@@ -208,6 +213,21 @@ class BeasiswaService {
       mahasiswa.id,
       beasiswaId
     );
+  }
+
+  async updateLockBeasiswa(beasiswaId, { isLock }) {
+    await this.checkExistById(beasiswaId);
+
+    await BeasiswaModel.updateOne(
+      { _id: beasiswaId },
+      { isLocked: isLock }
+    );
+  }
+
+  async checkBeasiswaIsLocked(beasiswaId) {
+    const beasiswa = await this.getById(beasiswaId);
+
+    return beasiswa.isLocked;
   }
 }
 

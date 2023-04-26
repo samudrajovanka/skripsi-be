@@ -56,3 +56,7 @@ exports.verifikatorGiveScore = Joi.object({
 exports.deleteVerifikatorSurvey = Joi.object({
   verifikatorId: Joi.string().required()
 });
+
+exports.updateLockBeasiswa = Joi.object({
+  isLock: Joi.boolean().required()
+});

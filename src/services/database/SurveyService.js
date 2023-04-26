@@ -70,6 +70,10 @@ class SurveyService {
   async giveScore(mahasiswaId, verifikatorId, beasiswaId, { score } ) {
     await this.checkExistSurvey({ mahasiswaId, verifikatorId, beasiswaId });
 
+    if (isLockedBeasiswa) {
+      throw new InvariantError("Beasiswa telah dikunci, tidak dapat memberikan nilai");
+    }
+
     await SurveyModel.updateOne(
       { mahasiswa: mahasiswaId, user: verifikatorId, beasiswa: beasiswaId },
       { score }

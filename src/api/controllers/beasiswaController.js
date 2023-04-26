@@ -252,7 +252,7 @@ exports.addDataValue = async (req, res) => {
 
     const penilaiService = new PenilaiService();
 
-    const participant = await penilaiService.add(id, username, req.body);
+    await penilaiService.add(id, username, req.body);
 
     return res.status(200).json({
       success: true,
@@ -346,6 +346,24 @@ exports.deleteVerifikatorSurvey = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Berhasil menghapus verifikator survey"
+    })
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}
+
+exports.updateLockBeasiswa = async (req, res) => {
+  try {
+    beasiswaValidation.validateUpdateLockBeasiswa(req.body);
+
+    const { id } = req.params;
+
+    const beasiswaService = new BeasiswaService();
+    await beasiswaService.updateLockBeasiswa(id, req.body);
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mengupdate status lock beasiswa"
     })
   } catch (error) {
     return errorRes(res, error);

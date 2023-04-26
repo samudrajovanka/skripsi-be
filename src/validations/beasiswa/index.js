@@ -10,7 +10,8 @@ const {
   addDataValue,
   addVerifikatorToMahasiswa,
   verifikatorGiveScore,
-  deleteVerifikatorSurvey
+  deleteVerifikatorSurvey,
+  updateLockBeasiswa
 } = require('./schema');
 
 const beasiswaValidation = {
@@ -72,6 +73,13 @@ const beasiswaValidation = {
   },
   validateDeleteVerifikatorSurvey: (payload) => {
     const validationResult = deleteVerifikatorSurvey.validate(payload);
+
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message, VALIDATION_ERR);
+    }
+  },
+  validateUpdateLockBeasiswa: (payload) => {
+    const validationResult = updateLockBeasiswa.validate(payload);
 
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message, VALIDATION_ERR);
