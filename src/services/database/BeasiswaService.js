@@ -4,6 +4,8 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const MahasiswaService = require('./MahasiswaService');
 const PesertaService = require('./PesertaService');
 const FirebaseStorageService = require('../firebase/StorageService');
+const SurveyService = require('./SurveyService');
+const UserService = require('./UserService');
 
 class BeasiswaService {
   async getAll() {
@@ -21,6 +23,18 @@ class BeasiswaService {
     const pesertaService = new PesertaService();
 
     const beasiswa = await pesertaService.getBeasiswaByMahasiswaId(mahasiswaId);
+
+    return beasiswa;
+  }
+
+  async getByVerifikator(username, id) {
+    const userService = new UserService();
+
+    await userService.checkExistByUsername(username);
+
+    const surveyService = new SurveyService();
+
+    const beasiswa = await surveyService.getBeasiswaByVerifikatorId(id);
 
     return beasiswa;
   }
@@ -151,6 +165,49 @@ class BeasiswaService {
     }
 
     await pesertaService.addFileToParticipant(beasiswaId, mahasiswaId, fileData);
+  }
+
+  async addVerifikatorToMahasiswa({ username, usernameVerifikator, beasiswaId }) {
+    await this.checkExistById(beasiswaId);
+
+    const mahasiswaService = new MahasiswaService();
+    const mahasiswa = await mahasiswaService.getByUsername(username);
+
+    const surveyService = new SurveyService();
+    await surveyService.add({
+      mahasiswaId: mahasiswa.id,
+      usernameVerifikator,
+      beasiswaId
+    });
+  }
+
+  async verifikatorGiveScore(username, idVerifikator, beasiswaId, { score }) {
+    await this.checkExistById(beasiswaId);
+
+    const mahasiswaService = new MahasiswaService();
+    const mahasiswa = await mahasiswaService.getByUsername(username);
+
+    const surveyService = new SurveyService();
+    await surveyService.giveScore(
+      mahasiswa.id,
+      idVerifikator,
+      beasiswaId,
+      { score }
+    );
+  }
+
+  async deleteVerifikatorSurvey(verifikatorId, username, beasiswaId) {
+    await this.checkExistById(beasiswaId);
+
+    const mahasiswaService = new MahasiswaService();
+    const mahasiswa = await mahasiswaService.getByUsername(username);
+
+    const surveyService = new SurveyService();
+    await surveyService.deleteVerifikatorSurvey(
+      verifikatorId,
+      mahasiswa.id,
+      beasiswaId
+    );
   }
 }
 

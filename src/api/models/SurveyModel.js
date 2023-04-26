@@ -19,9 +19,8 @@ const SurveySchema = new BaseSchema(
       ref: 'Mahasiswa',
       required: true,
     },
-    value: {
+    score: {
       type: Number,
-      required: true,
       min: 0,
       max: 68
     },

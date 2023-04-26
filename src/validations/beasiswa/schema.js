@@ -44,3 +44,15 @@ exports.addDataValue = Joi.object({
     parameterId: Joi.string().required()
   })).required()
 });
+
+exports.addVerifikatorToMahasiswa = Joi.object({
+  usernameVerifikator: Joi.string().required()
+});
+
+exports.verifikatorGiveScore = Joi.object({
+  score: Joi.number().required().min(0).max(68)
+});
+
+exports.deleteVerifikatorSurvey = Joi.object({
+  verifikatorId: Joi.string().required()
+});
