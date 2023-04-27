@@ -5,7 +5,7 @@ const BeasiswaService = require('./BeasiswaService');
 class PenilaiService {
   async add(beasiswaId, username, { data }) {
     const beasiswaService = new BeasiswaService();
-    const isLocked = await beasiswaService.checkBeasiswaIsLocked(beasiswaId);
+    const beasiswa = await beasiswaService.getById(beasiswaId);
     if (isLocked) {
       throw new InvariantError('Beasiswa sudah dikunci, tidak bisa memberikan nilai');
     }

@@ -13,8 +13,7 @@ class KriteriaService {
   }
 
   async getAll() {
-    const kriteria = await KriteriaModel.find()
-      .sort({ createdAt: -1 });
+    const kriteria = await KriteriaModel.find();
 
     return kriteria;
   }

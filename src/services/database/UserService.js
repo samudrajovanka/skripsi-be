@@ -20,22 +20,20 @@ class UserService {
   }
 
   async getAll() {
-    const usersRaw = await UserModel.find()
-      .sort({ createdAt: -1 });
-
-    const users = usersRaw.map(this.#removePassword);
+    const users = await UserModel.find()
+      .select('-password')
+      .sort({ createdAt: -1 })
 
     return users;
   }
 
   async getByUsername(username) {
-    const userRaw = await UserModel.findOne({ username });
+    const user = await UserModel.findOne({ username })
+      .select('-password');
 
-    if(!userRaw) {
+    if(!user) {
       throw new NotFoundError('User tidak ditemukan');
     }
-
-    const user = this.#removePassword(userRaw);
 
     return user;
   }
@@ -67,13 +65,6 @@ class UserService {
     if (!isExist) {
       throw new NotFoundError(`User dengan username '${username}' tidak ditemukan`);
     }
-  }
-
-  #removePassword(user) {
-    const userJson = user.toJSON();
-    delete userJson.password;
-
-    return userJson;
   }
 }
 

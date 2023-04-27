@@ -103,6 +103,22 @@ class BeasiswaService {
     return participants;
   }
 
+  async getParticipantsByBeasiswaIdVerifiktor(beasiswaId, verifikatorId) {
+    await this.checkExistById(beasiswaId);
+
+    const pesertaService = new PesertaService();
+    const participants = await pesertaService.getByBeasiswaId(beasiswaId);
+
+    const surveyService = new SurveyService();
+    const mahasiswaId = await surveyService.getMahasiswaIdByVerifikatorId(beasiswaId, verifikatorId);
+
+    const participantsByVerifikator = participants.filter((participant) => (
+      mahasiswaId.includes(participant.mahasiswa.id)
+    ));
+
+    return participantsByVerifikator;
+  }
+
   async addParticipantExistMahasiswa(beasiswaId, { mahasiswaId, mahasiswaNim }) {
     await this.checkExistById(beasiswaId);
     await this.checkClosedBeasiswa(beasiswaId);
@@ -184,8 +200,8 @@ class BeasiswaService {
   async verifikatorGiveScore(username, idVerifikator, beasiswaId, { score }) {
     await this.checkExistById(beasiswaId);
 
-    const isLocked = await this.checkBeasiswaIsLocked(beasiswaId);
-    if (isLocked) {
+    const beasiswa = await this.getById(beasiswaId);
+    if (beasiswa.isLocked) {
       throw new InvariantError('Beasiswa sudah dikunci, tidak bisa memberikan nilai');
     }
 
@@ -224,10 +240,87 @@ class BeasiswaService {
     );
   }
 
-  async checkBeasiswaIsLocked(beasiswaId) {
+  calculationCertaintyFactorScore(...cf) {
+    const result = cf.reduce((result, value, index) => {
+      if (index === 1) return result;
+
+      const cfOld = index === 0 ? value : result;
+      const cfNext = index === 0 ? cf[1] : value;
+
+      if (cfOld > 0 && cfNext > 0) {
+        // console.log(`${cfOld} + ${cfNext} * (1 - ${cfOld}) => ${cfOld + (cfNext * (1 - cfOld))}`);
+        return cfOld + (cfNext * (1 - cfOld));
+      } else if ((cfOld > 0 && cfNext < 0) || (cfOld < 0 && cfNext > 0)) {
+        // console.log(`(${cfOld} + ${cfNext})/(1-Math.min(${Math.abs(cfOld)}, ${Math.abs(cfNext)})) => ${(cfOld + cfNext)/(1-Math.min(Math.abs(cfOld), Math.abs(cfNext)))}`);
+        return (cfOld + cfNext)/(1-Math.min(Math.abs(cfOld), Math.abs(cfNext)));
+      } else {
+        // console.log(`${cfOld} + ${cfNext} * (1 + ${cfOld}) => ${cfOld + (cfNext * (1 + cfOld))}`);
+        return cfOld + (cfNext * (1 + cfOld))
+      }
+    }, 0);
+
+    return result;
+  }
+
+  async seleksi(beasiswaId) {
     const beasiswa = await this.getById(beasiswaId);
 
-    return beasiswa.isLocked;
+    if (!beasiswa.isLocked) {
+      throw new InvariantError('Beasiswa belum dikunci, tidak bisa melakukan seleksi');
+    }
+
+    const pesertaService = new PesertaService();
+    const peserta = await pesertaService.getByBeasiswaId(beasiswaId);
+    
+    const surveyService = new SurveyService();
+    const cfAverageSurvey = await surveyService.getCFAverageSurvey(beasiswaId);
+
+    const result = peserta.map((item) => {
+      const cf = item.data.map((parameter) => parameter.certaintyValue);
+      cf.push(cfAverageSurvey[item.mahasiswa.id].cf ?? -1);
+
+      const cfScore = this.calculationCertaintyFactorScore(...cf);
+
+      return {
+        mahasiswa: item.mahasiswa,
+        value: cfScore.toFixed(4)
+      }
+    })
+    .sort((a, b) => b.value - a.value)
+    .map((item, index) => ({
+      ...item,
+      status: index <= beasiswa.quota
+        ? item.value > 0.2 ? "diterima" : "ditolak"
+        : "ditolak"
+    }));
+
+    return result;
+  }
+
+  async seleksiAndSave(beasiswaId) {
+    const seleksiResult = await this.seleksi(beasiswaId);
+
+    const finalSeleksiResult = seleksiResult.map((item) => ({
+      ...item,
+      mahasiswa: item.mahasiswa.id
+    }));
+
+    await BeasiswaModel.updateOne(
+      { _id: beasiswaId },
+      { result: finalSeleksiResult }
+    );
+  }
+
+  async getBeasiswaResult(beasiswaId) {
+    await this.checkExistById(beasiswaId);
+
+    const beasiswa = await BeasiswaModel.findById(beasiswaId)
+      .populate({
+        path: 'result.mahasiswa',
+        select: '-password'
+      });
+
+    return beasiswa.result;
   }
 }
 

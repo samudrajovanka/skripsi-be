@@ -171,7 +171,13 @@ exports.getParticipantBeasiswa = async (req, res) => {
 
     const beasiswaService = new BeasiswaService();
 
-    const participants = await beasiswaService.getParticipantsByBeasiswaId(id);
+    let participants = [];
+
+    if (req.user.role === "verifikator") {
+      participants = await beasiswaService.getParticipantsByBeasiswaIdVerifiktor(id, req.user.id);
+    } else {
+      participants = await beasiswaService.getParticipantsByBeasiswaId(id);
+    }
 
     return res.status(200).json({
       success: true,
@@ -313,12 +319,31 @@ exports.verifikatorGiveScore = async (req, res) => {
   }
 }
 
+exports.getSurveys = async (req, res) => {
+  try {
+    const { id: beasiswaId } = req.params;
+
+    const surveyService = new SurveyService();
+    const surveys = await surveyService.getSurveys(req.user, { beasiswaId });
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mendapatkan data survey",
+      data: {
+        surveys
+      }
+    })
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}
+
 exports.getSurveysMahasiswa = async (req, res) => {
   try {
     const { id: beasiswaId, username } = req.params;
 
     const surveyService = new SurveyService();
-    const surveys = await surveyService.getSurveys(username, beasiswaId);
+    const surveys = await surveyService.getSurveysMahasiswa(username, beasiswaId);
 
     return res.status(200).json({
       success: true,
@@ -365,6 +390,63 @@ exports.updateLockBeasiswa = async (req, res) => {
       success: true,
       message: "Berhasil mengupdate status lock beasiswa"
     })
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}
+
+exports.seleksiBeasiswa = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const beasiswaService = new BeasiswaService();
+
+    const seleksiResult = await beasiswaService.seleksi(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil melakukan seleksi beasiswa",
+      data: {
+        result: seleksiResult
+      }
+    });
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}
+
+exports.seleksiBeasiswaAndSave = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const beasiswaService = new BeasiswaService();
+
+    await beasiswaService.seleksiAndSave(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil menyimpan seleksi beasiswa"
+    });
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}
+
+exports.getBeasiswaResult = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const beasiswaService = new BeasiswaService();
+
+    const result = await beasiswaService.getBeasiswaResult(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mendapatkan hasil seleksi beasiswa",
+      data: {
+        result
+      }
+    });
   } catch (error) {
     return errorRes(res, error);
   }

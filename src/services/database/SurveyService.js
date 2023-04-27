@@ -1,8 +1,11 @@
+const mongoose = require('mongoose');
+
 const SurveyModel = require("../../api/models/SurveyModel");
 const InvariantError = require("../../exceptions/InvariantError");
 const NotFoundError = require("../../exceptions/NotFoundError");
 const MahasiswaService = require("./MahasiswaService");
 const UserService = require("./UserService");
+const { cfConvertionSurvey, cfPakarSurvey } = require("../../config/certaintyValueSurvey");
 
 class SurveyService {
   async checkUserIsVerifikator(username) {
@@ -67,12 +70,16 @@ class SurveyService {
     return beasiswa;
   }
 
+  async getMahasiswaIdByVerifikatorId(beasiswaId, verifikatorId) {
+    const surveys = await SurveyModel.find({ beasiswa: beasiswaId, user: verifikatorId });
+
+    const mahasiswaIdByVerifikator = surveys.map((item) => item.mahasiswa.toString());
+
+    return mahasiswaIdByVerifikator;
+  }
+
   async giveScore(mahasiswaId, verifikatorId, beasiswaId, { score } ) {
     await this.checkExistSurvey({ mahasiswaId, verifikatorId, beasiswaId });
-
-    if (isLockedBeasiswa) {
-      throw new InvariantError("Beasiswa telah dikunci, tidak dapat memberikan nilai");
-    }
 
     await SurveyModel.updateOne(
       { mahasiswa: mahasiswaId, user: verifikatorId, beasiswa: beasiswaId },
@@ -80,26 +87,49 @@ class SurveyService {
     );
   }
 
-  async getSurveys(username, beasiswaId) {
+  async getSurveysMahasiswa(username, beasiswaId) {
     const mahasiswaService = new MahasiswaService();
     const mahasiswa = await mahasiswaService.getByUsername(username);
 
-    const surveysRaw = await SurveyModel.find({ mahasiswa: mahasiswa.id, beasiswa: beasiswaId })
-    .populate("user")
-    .select("-beasiswa -mahasiswa");
+    const surveys = await SurveyModel.find({ mahasiswa: mahasiswa.id, beasiswa: beasiswaId })
+      .populate({
+        path: "user",
+        select: "-password",
+      })
+      .select("-beasiswa -mahasiswa");
 
-    if (!surveysRaw.length) {
+    if (!surveys.length) {
       throw new NotFoundError("Survey tidak ditemukan");
     }
 
-    // remove password
-    const surveys = surveysRaw.map((item) => {
-      const itemJson = item.toJSON();
+    return surveys;
+  }
 
-      delete itemJson.user.password;
+  async getSurveys(user, { beasiswaId }) {
+    let surveys = [];
+    if (user.role === 'verifikator') {
+      surveys = await SurveyModel.find({ beasiswa: beasiswaId, user: user.id })
+        .populate({
+          path: "mahasiswa",
+          select: "-password",
+        })
+        .select("-beasiswa -user");
+    } else {
+      surveys = await SurveyModel.find({ beasiswa: beasiswaId })
+        .populate({
+          path: "mahasiswa",
+          select: "-password",
+        })
+        .populate({
+          path: "user",
+          select: "-password",
+        })
+        .select("-beasiswa");
+    }
 
-      return itemJson;
-    });
+    if (!surveys.length) {
+      throw new NotFoundError("Survey tidak ditemukan");
+    }
 
     return surveys;
   }
@@ -108,6 +138,54 @@ class SurveyService {
     await this.checkExistSurvey({ mahasiswaId, verifikatorId, beasiswaId });
 
     await SurveyModel.deleteOne({ mahasiswa: mahasiswaId, user: verifikatorId, beasiswa: beasiswaId });
+  }
+
+  async getAverageScorePerMahasiswa(beasiswaId) {
+    const surveysRaw = await SurveyModel.aggregate([
+      { $match: { beasiswa: new mongoose.Types.ObjectId(beasiswaId) } },
+      {
+        $group: {
+          _id: "$mahasiswa",
+          averageScore: { $avg: "$score" },
+        },
+      },
+    ]);
+
+    const surveys = surveysRaw.map((item) => {
+      const itemJson = item;
+
+      itemJson.mahasiswa = item._id;
+
+      delete itemJson._id;
+
+      return {
+        ...itemJson,
+        averageScore: itemJson.averageScore ?? 0
+      };
+    });
+
+    return surveys;
+  }
+
+  async getCFAverageSurvey(beasiswaId) {
+    const averages = await this.getAverageScorePerMahasiswa(beasiswaId);
+
+    const result = averages.reduce((res, average) => {
+      const cfSurvey = Object.entries(cfConvertionSurvey).find((item) => {
+        const [, value] = item;
+
+        return average.averageScore >= value.min && average.averageScore <= value.max;
+      });
+
+      res[average.mahasiswa] = {
+        averageScore: average.averageScore,
+        cf: +cfSurvey[0] * cfPakarSurvey,
+      }
+
+      return res;
+    }, {});
+
+    return result;
   }
 }
 

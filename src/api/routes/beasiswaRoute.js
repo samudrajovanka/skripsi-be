@@ -27,7 +27,7 @@ router.post(
 router.get(
   '/:id/peserta',
   authentication,
-  authorization(['admin']),
+  authorization(['admin', 'penilai', 'verifikator']),
   beasiswaController.getParticipantBeasiswa
 );
 router.delete(
@@ -67,17 +67,41 @@ router.delete(
   authorization(['admin']),
   beasiswaController.deleteVerifikatorSurvey
 )
+router.get(
+  '/:id/survey',
+  authentication,
+  authorization(['admin', 'verifikator']),
+  beasiswaController.getSurveys
+);
 router.post(
-  '/:id/peserta/:username/survey',
+  '/:id/survey/:username',
   authentication,
   authorization(['verifikator']),
   beasiswaController.verifikatorGiveScore
 );
 router.get(
-  '/:id/peserta/:username/survey',
+  '/:id/survey/:username',
   authentication,
-  authorization(['admin', 'penilai', 'verifikator']),
+  authorization(['admin']),
   beasiswaController.getSurveysMahasiswa
+);
+router.get(
+  '/:id/seleksi',
+  authentication,
+  authorization(['admin']),
+  beasiswaController.seleksiBeasiswa
+);
+router.post(
+  '/:id/seleksi/save',
+  authentication,
+  authorization(['admin']),
+  beasiswaController.seleksiBeasiswaAndSave
+);
+router.get(
+  '/:id/result',
+  authentication,
+  authorization(['admin']),
+  beasiswaController.getBeasiswaResult
 );
 
 module.exports = router;

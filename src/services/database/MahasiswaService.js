@@ -20,22 +20,20 @@ class MahasiswaService {
   }
 
   async getAll() {
-    const usersRaw = await MahasiswaModel.find()
+    const users = await MahasiswaModel.find()
+      .select('-password')
       .sort({ createdAt: -1 });
-
-    const users = usersRaw.map(this.#removePassword);
 
     return users;
   }
 
   async getByUsername(username) {
-    const userRaw = await MahasiswaModel.findOne({ username });
+    const user = await MahasiswaModel.findOne({ username })
+      .select('-password');
 
     if(!userRaw) {
       throw new NotFoundError('Mahasiswa tidak ditemukan');
     }
-
-    const user = this.#removePassword(userRaw);
 
     return user;
   }
@@ -73,13 +71,6 @@ class MahasiswaService {
     if (!isExist) {
       throw new NotFoundError(`Mahasiswa dengan id '${id}' tidak ditemukan`);
     }
-  }
-
-  #removePassword(user) {
-    const userJson = user.toJSON();
-    delete userJson.password;
-
-    return userJson;
   }
 }
 

@@ -31,18 +31,14 @@ class PesertaService {
   async getByBeasiswaId(beasiswaId) {
     const participants = await PesertaModel.find({ beasiswa: beasiswaId })
       .sort({ createdAt: -1 })
-      .populate('mahasiswa')
+      .populate({
+        path: 'mahasiswa',
+        select: '-password'
+      })
+      .populate('data')
       .select('-beasiswa');
 
-    const finalParticipant = participants.map((participant) => {
-      const participantJson = participant.toJSON();
-
-      delete participantJson.mahasiswa.password;
-
-      return participantJson;
-    });
-
-    return finalParticipant;
+    return participants;
   }
 
   async deleteManyByBeasiswaId(beasiswaId) {
@@ -59,7 +55,11 @@ class PesertaService {
     const participantOnScholarship = await PesertaModel.find({
       beasiswa: beasiswaId,
     })
-    .populate("mahasiswa data")
+    .populate({
+      path: 'mahasiswa',
+      select: '-password'
+    })
+    .populate('data')
     .select('-beasiswa');
 
     const participant = participantOnScholarship.filter(
@@ -70,10 +70,7 @@ class PesertaService {
       throw new NotFoundError('Peserta tidak ditemukan');
     }
 
-    const finalParticipant = participant.toJSON();
-    delete finalParticipant.mahasiswa.password;
-
-    return finalParticipant;
+    return participant;
   }
 
   async getBeasiswaByMahasiswaId(mahasiswaId) {
