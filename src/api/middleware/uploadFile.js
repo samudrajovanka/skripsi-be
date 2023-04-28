@@ -31,8 +31,14 @@ exports.upload = (type) =>
       uploadEngine = uploadPDF;
   }
 
-  uploadEngine[engine](option)(req, res, (err) => {
+  uploadEngine[engine](...option)(req, res, (err) => {
     if (err) {
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+          return errorRes(res, new InvariantError('File yang diupload melebihi batas maksimal'));
+        }
+      }
+
       return errorRes(res, err)
     }
 

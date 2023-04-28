@@ -3,7 +3,7 @@ const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const MahasiswaService = require('./MahasiswaService');
 const PesertaService = require('./PesertaService');
-const FirebaseStorageService = require('../firebase/StorageService');
+const FirebaseStorageService = require('../firebase/FirebaseStorageService');
 const SurveyService = require('./SurveyService');
 const UserService = require('./UserService');
 

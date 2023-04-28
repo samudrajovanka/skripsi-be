@@ -5,25 +5,27 @@ const BaseSchema = require('../../utils/database/mongoose');
 const PengumumanSchema = new BaseSchema(
   {
     title: {
-      type: string,
+      type: String,
       required: true,
       trim: true,
     },
     content: {
-      type: string,
+      type: String,
       required: true,
       trim: true,
     },
-    file: {
-      name: {
-        type: string,
-        required: true,
-      },
-      url: {
-        type: string,
-        required: true,
+    files: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        url: {
+          type: String,
+          required: true,
+        }
       }
-    },
+    ],
     isActive: {
       type: Boolean,
       required: true,

@@ -4,6 +4,7 @@ const authRoute = require('./api/routes/authRoute');
 const beasiswaRoute = require('./api/routes/beasiswaRoute');
 const kriteriaRoute = require('./api/routes/kriteriaRoute');
 const fileRoute = require('./api/routes/fileRoute');
+const pengumumanRoute = require('./api/routes/pengumumanRoute');
 
 const createAPIUrl = (url) => `/api${url}`;
 
@@ -31,6 +32,10 @@ const routes = [
   {
     url: createAPIUrl('/berkas'),
     api: fileRoute,
+  },
+  {
+    url: createAPIUrl('/pengumuman'),
+    api: pengumumanRoute,
   },
 ];
 

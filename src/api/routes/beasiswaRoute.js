@@ -40,7 +40,7 @@ router.post(
   '/:id/peserta/upload-berkas',
   authentication,
   authorization(['mahasiswa']),
-  upload('pdf')('single', 'file'),
+  upload('pdf')('single', ['file']),
   beasiswaController.uploadFile
 );
 router.get(
