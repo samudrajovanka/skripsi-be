@@ -73,8 +73,10 @@ class BeasiswaService {
     await BeasiswaModel.findByIdAndDelete(id);
 
     const pesertaService = new PesertaService();
-
     await pesertaService.deleteManyByBeasiswaId(id);
+
+    const surveyService = new SurveyService();
+    await surveyService.deleteManyByBeasiswaId(id);
   }
 
   async checkExistById(id) {

@@ -140,6 +140,10 @@ class SurveyService {
     await SurveyModel.deleteOne({ mahasiswa: mahasiswaId, user: verifikatorId, beasiswa: beasiswaId });
   }
 
+  async deleteManyByBeasiswaId(beasiswaId) {
+    await SurveyModel.deleteMany({ beasiswa: beasiswaId });
+  }
+
   async getAverageScorePerMahasiswa(beasiswaId) {
     const surveysRaw = await SurveyModel.aggregate([
       { $match: { beasiswa: new mongoose.Types.ObjectId(beasiswaId) } },
