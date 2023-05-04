@@ -39,6 +39,24 @@ exports.getAll = async (req, res) => {
   }
 }
 
+exports.getById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const fileService = new FileService();
+    const file = await fileService.getById(id);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        berkas: file
+      }
+    });
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}
+
 exports.updateById = async (req, res) => {
   try {
     const { id } = req.params;

@@ -23,3 +23,17 @@ exports.login = async (req, res) => {
     return errorRes(res, error);
   }
 }
+
+exports.getMe = async (req, res) => {
+  try {
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mendapatkan data user",
+      data: {
+        user: req.user,
+      }
+    });
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}

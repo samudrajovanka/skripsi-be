@@ -26,7 +26,7 @@ class AuthService {
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordMatch) AuthenticationError('Username atau password salah');
+    if (!isPasswordMatch) throw new AuthenticationError('Username atau password salah');
 
     const payload = {
       id: user._id,
@@ -48,7 +48,7 @@ class AuthService {
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordMatch) AuthenticationError('Username atau password salah');
+    if (!isPasswordMatch) throw new AuthenticationError('Username atau password salah');
 
     const payload = {
       id: user._id,

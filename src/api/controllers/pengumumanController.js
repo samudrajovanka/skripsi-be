@@ -7,8 +7,6 @@ exports.create = async (req, res) => {
     pengumumanValidation.validateCreatePayload(req.body);
 
     const pengumumanService = new PengumumanService();
-    console.log(req.files);
-    console.log(req.files.length);
     
     const pengumuman = await pengumumanService.create({ ...req.body, files: req.files });
 
@@ -28,7 +26,11 @@ exports.getAll = async (req, res) => {
   try {
     const pengumumanService = new PengumumanService();
 
-    const pengumuman = await pengumumanService.getAll();
+    const { isActive } = req.query;
+
+    const pengumuman = await pengumumanService.getAll({
+      isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined
+    });
 
     return res.status(200).json({
       success: true,

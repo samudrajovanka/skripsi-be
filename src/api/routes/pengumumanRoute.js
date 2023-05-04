@@ -14,12 +14,10 @@ router.post(
 );
 router.get(
   '/',
-  authentication,
   pengumumanController.getAll
 );
 router.get(
   '/:id',
-  authentication,
   pengumumanController.getById
 );
 router.delete(

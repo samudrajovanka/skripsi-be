@@ -18,7 +18,6 @@ class PengumumanService {
     }
 
     let filesUploaded = [];
-    console.log(files.length)
     if (files.length) {
       const firebaseStorageService = new FirebaseStorageService();
       filesUploaded = (await firebaseStorageService.uploadFiles(
@@ -31,9 +30,11 @@ class PengumumanService {
         }));
     }
 
+    const contentWithBreak = content.replace(/\n/g, '<br>');
+
     const newPengumuman = PengumumanModel({
       title,
-      content,
+      content: contentWithBreak,
       files: filesUploaded,
       isActive
     });
@@ -43,8 +44,10 @@ class PengumumanService {
     return newPengumuman;
   }
 
-  async getAll() {
-    const pengumuman = await PengumumanModel.find();
+  async getAll({ isActive }) {
+    const pengumuman = await PengumumanModel.find({
+      isActive: isActive === undefined ? { $ne: null } : isActive
+    });
 
     return pengumuman;
   }
@@ -68,8 +71,10 @@ class PengumumanService {
   async updateById(id, { title, content, files, oldFiles, isActive }) {
     await this.checkExistPengumumanById(id);
 
-    const totalFIles = oldFiles.length + files.length;
-    if (totalFIles > 3) {
+    const oldFilesArray = oldFiles ?? [];
+
+    const totalFiles = oldFilesArray.length + files.length;
+    if (totalFiles > 3) {
       throw new InvariantError('Maksimal 3 file');
     }
 
@@ -87,10 +92,12 @@ class PengumumanService {
         }));
     }
 
+    const contentWithBreak = content.replace(/\n/g, '<br>');
+
     await PengumumanModel.findByIdAndUpdate(id, {
       title,
-      content,
-      files: [...oldFiles, ...filesUploaded],
+      content: contentWithBreak,
+      files: [...oldFilesArray, ...filesUploaded],
       isActive
     });
   }

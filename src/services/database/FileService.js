@@ -15,6 +15,14 @@ class FileService {
     return files;
   }
 
+  async getById(id) {
+    await this.checkExistById(id);
+
+    const file = await FileModel.findById(id);
+
+    return file;
+  }
+
   async updateById(id, { name }) {
     await this.checkExistById(id);
 

@@ -31,7 +31,7 @@ class MahasiswaService {
     const user = await MahasiswaModel.findOne({ username })
       .select('-password');
 
-    if(!userRaw) {
+    if(!user) {
       throw new NotFoundError('Mahasiswa tidak ditemukan');
     }
 
