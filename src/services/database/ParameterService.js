@@ -1,4 +1,5 @@
 const ParameterModel = require("../../api/models/ParameterModel");
+const NotFoundError = require("../../exceptions/NotFoundError");
 
 class ParameterService {
   async getAllParameterByKriteria(kriteriaId) {
@@ -9,6 +10,14 @@ class ParameterService {
     return parameters;
   }
 
+  async getById(kriteriaId, parameterId) {
+    await this.checkExistById(kriteriaId, parameterId);
+
+    const parameter = await ParameterModel.findOne({ kriteria: kriteriaId, _id: parameterId });
+
+    return parameter;
+  }
+
   async create(kriteriaId, { name, certaintyValue }) {
     const parameter = ParameterModel({ name, certaintyValue, kriteria: kriteriaId });
 
@@ -17,11 +26,14 @@ class ParameterService {
     return parameter;
   }
 
-  async updateById(id, { name, certaintyValue }) {
-    await this.checkExistById(id);
+  async updateById(kriteriaId, parameterId, { name, certaintyValue }) {
+    await this.checkExistById(kriteriaId, parameterId);
 
-    const parameter = await ParameterModel.findByIdAndUpdate(
-      id,
+    const parameter = await ParameterModel.findOneAndUpdate(
+      {
+        kriteria: kriteriaId,
+        _id: parameterId,
+      },
       {
         name,
         certaintyValue,
@@ -31,17 +43,23 @@ class ParameterService {
     return parameter;
   }
 
-  async deleteById(id) {
-    await this.checkExistById(id);
+  async deleteById(kriteriaId, parameterId) {
+    await this.checkExistById(kriteriaId, parameterId);
 
-    await ParameterModel.findByIdAndDelete(id);
+    await ParameterModel.findOneAndDelete({
+      kriteria: kriteriaId,
+      _id: parameterId,
+    });
   }
 
-  async checkExistById(id) {
-    const parameter = await ParameterModel.exists({ _id: id });
+  async checkExistById(kriteriaId, parameterId) {
+    const parameter = await ParameterModel.exists({
+      kriteria: kriteriaId,
+      _id: parameterId
+    });
 
     if (!parameter) {
-      throw new NotFoundError(`Parameter dengan id ${id} tidak ditemukan`);
+      throw new NotFoundError(`Parameter dengan id ${parameterId} pada kriteria id ${kriteriaId} tidak ditemukan`);
     }
   }
 

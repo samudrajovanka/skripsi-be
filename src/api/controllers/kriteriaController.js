@@ -116,6 +116,27 @@ exports.getAllParameter = async (req, res) => {
   }
 }
 
+exports.getParameterById = async (req, res) => {
+  try {
+    const kriteriaService = new KriteriaService();
+
+    const kriteriaId = req.params.id;
+    const parameterId = req.params.parameterId;
+
+    const parameter = await kriteriaService.getParameterById(kriteriaId, parameterId);
+
+    res.status(200).json({
+      success: true,
+      message: "Parameter berhasil didapatkan",
+      data: {
+        parameter
+      }
+    });
+  } catch (error) {
+    return errorRes(res, error)
+  }
+}
+
 exports.addParameter = async (req, res) => {
   try {
     kriteriaValidation.validateAddParameterPayload(req.body);

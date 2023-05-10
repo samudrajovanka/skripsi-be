@@ -1,12 +1,13 @@
 const PesertaModel = require('../../api/models/PesertaModel');
 const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
 const BeasiswaService = require('./BeasiswaService');
 
 class PenilaiService {
   async add(beasiswaId, username, { data }) {
     const beasiswaService = new BeasiswaService();
     const beasiswa = await beasiswaService.getById(beasiswaId);
-    if (isLocked) {
+    if (beasiswa.isLocked) {
       throw new InvariantError('Beasiswa sudah dikunci, tidak bisa memberikan nilai');
     }
 

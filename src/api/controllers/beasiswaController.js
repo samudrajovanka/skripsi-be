@@ -250,6 +250,26 @@ exports.getParticipantByUsername = async (req, res) => {
   }
 }
 
+exports.getParticipantMe = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const pesertaService = new PesertaService();
+
+    const participant = await pesertaService.getParticipantByUsername(id, req.user.username);
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mendapatkan peserta beasiswa",
+      data: {
+        peserta: participant
+      }
+    })
+  } catch (error) {
+    return errorRes(res, error);
+  }
+}
+
 exports.addDataValue = async (req, res) => {
   try {
     beasiswaValidation.validateAddDataValueParticipant(req.body);
@@ -274,7 +294,6 @@ exports.addVerifikatorToMahasiswa = async (req, res) => {
     beasiswaValidation.validateAddVerifikatorToMahasiswa(req.body);
 
     const { id: beasiswaId, username } = req.params;
-
 
     const { usernameVerifikator } = req.body;
 

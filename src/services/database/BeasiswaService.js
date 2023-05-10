@@ -46,7 +46,15 @@ class BeasiswaService {
       throw new NotFoundError('Beasiswa tidak ditemukan');
     }
 
-    return beasiswa;
+    const pesertaService = new PesertaService();
+    const totalParticipants = await pesertaService.countPaticipantByBeasiswaId(id);
+    
+    const beasiswaWithParticipantsLength = {
+      ...beasiswa.toJSON(),
+      totalParticipants
+    };
+
+    return beasiswaWithParticipantsLength;
   }
 
   async create({ name, year, quota, openDate, closeDate, status }) {

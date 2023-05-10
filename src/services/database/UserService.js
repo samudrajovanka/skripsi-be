@@ -19,8 +19,10 @@ class UserService {
     return newUser;
   }
 
-  async getAll() {
-    const users = await UserModel.find()
+  async getAll({ role }) {
+    const users = await UserModel.find({
+      role: role === undefined ? { $ne: null } : role
+    })
       .select('-password')
       .sort({ createdAt: -1 })
 

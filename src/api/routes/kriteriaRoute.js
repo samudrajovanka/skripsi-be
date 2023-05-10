@@ -10,6 +10,7 @@ router.get('/:id', authentication, kriteriaController.getById);
 router.put('/:id', authentication, authorization(['admin']), kriteriaController.updateById);
 router.delete('/:id', authentication, authorization(['admin']), kriteriaController.deleteById);
 router.get('/:id/parameter', authentication, kriteriaController.getAllParameter);
+router.get('/:id/parameter/:parameterId', authentication, kriteriaController.getParameterById);
 router.post(
   '/:id/parameter',
   authentication,

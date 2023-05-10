@@ -27,7 +27,12 @@ const authentication = async (req, res, next) => {
 
       user = await mahasiswaService.getByUsername(username);
 
-      req.user = user;
+      const userWithRole = {
+        ...user.toJSON(),
+        role: "mahasiswa",
+      }
+
+      req.user = userWithRole;
       return next();
     }
 

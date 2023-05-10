@@ -44,6 +44,12 @@ router.post(
   beasiswaController.uploadFile
 );
 router.get(
+  '/:id/peserta/me',
+  authentication,
+  authorization(['mahasiswa']),
+  beasiswaController.getParticipantMe
+);
+router.get(
   '/:id/peserta/:username',
   authentication,
   authorization(['admin', 'verifikator', 'penilai']),

@@ -30,15 +30,18 @@ class PesertaService {
 
   async getByBeasiswaId(beasiswaId) {
     const participants = await PesertaModel.find({ beasiswa: beasiswaId })
-      .sort({ createdAt: -1 })
+      // .sort({ createdAt: -1 })
       .populate({
         path: 'mahasiswa',
-        select: '-password'
+        select: '-password',
+        // options: { sort: { nim: -1 } }
       })
       .populate('data')
-      .select('-beasiswa');
+      .select('-beasiswa')
 
-    return participants;
+    const participantsSortedByNim = participants.sort((a, b) => +a.mahasiswa.nim - +b.mahasiswa.nim);
+
+    return participantsSortedByNim;
   }
 
   async deleteManyByBeasiswaId(beasiswaId) {
@@ -105,6 +108,12 @@ class PesertaService {
     participant.files = [...oldFilterData, newData];
 
     await participant.save();
+  }
+
+  async countPaticipantByBeasiswaId(beasiswaId) {
+    const participantsCount = await PesertaModel.countDocuments({ beasiswa: beasiswaId });
+
+    return participantsCount;
   }
 };
 

@@ -19,6 +19,8 @@ class KriteriaService {
   }
 
   async getById(id) {
+    await this.checkExistById(id);
+    
     const kriteria = await KriteriaModel.findById(id);
 
     return kriteria;
@@ -61,6 +63,16 @@ class KriteriaService {
     return parameter;
   }
 
+  async getParameterById(kriteriaId, parameterId) {
+    await this.checkExistById(kriteriaId);
+
+    const parameterService = new ParameterService();
+
+    const parameter = await parameterService.getById(kriteriaId, parameterId);
+
+    return parameter;
+  }
+
   async addParameter(kriteriaId, { name, certaintyValue }) {
     await this.checkExistById(kriteriaId);
 
@@ -76,7 +88,7 @@ class KriteriaService {
 
     const parameterService = new ParameterService();
 
-    const parameter = await parameterService.updateById(parameterId, { name, certaintyValue });
+    const parameter = await parameterService.updateById(kriteriaId, parameterId, { name, certaintyValue });
 
     return parameter;
   }
@@ -86,7 +98,7 @@ class KriteriaService {
 
     const parameterService = new ParameterService();
 
-    await parameterService.deleteById(parameterId);
+    await parameterService.deleteById(kriteriaId, parameterId);
   }
 }
 

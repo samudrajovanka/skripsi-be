@@ -23,7 +23,8 @@ exports.getAllUsers = async (req, res) => {
   try {
     const userService = new UserService();
 
-    const users = await userService.getAll();
+    const role = req.query.role;
+    const users = await userService.getAll({ role });
 
     return res.status(200).json({
       success: true,
