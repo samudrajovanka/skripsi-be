@@ -88,7 +88,7 @@ router.post(
 router.get(
   '/:id/survey/:username',
   authentication,
-  authorization(['admin']),
+  authorization(['admin', "verifikator"]),
   beasiswaController.getSurveysMahasiswa
 );
 router.get(

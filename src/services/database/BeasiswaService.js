@@ -40,7 +40,11 @@ class BeasiswaService {
   }
 
   async getById(id) {
-    const beasiswa = await BeasiswaModel.findById(id);
+    const beasiswa = await BeasiswaModel.findById(id)
+      .populate({
+        path: 'result.mahasiswa',
+        select: '-password',
+      });
 
     if (!beasiswa) {
       throw new NotFoundError('Beasiswa tidak ditemukan');
@@ -99,7 +103,7 @@ class BeasiswaService {
     const beasiswa = await this.getById(id);
 
     if (beasiswa.status === 'tutup') {
-      throw new InvariantError(`Beasiswa dengan id '${id}' sudah ditutup`);
+      throw new InvariantError(`Beasiswa ${beasiswa.name} sudah ditutup`);
     }
   }
 
@@ -167,8 +171,10 @@ class BeasiswaService {
     await this.checkExistById(beasiswaId);
 
     const pesertaService = new PesertaService();
-
     await pesertaService.deleteParticipantBeasiswa(beasiswaId, username);
+
+    const surveyService = new SurveyService();
+    await surveyService.deleteSurveyParticipant(beasiswaId, username);
   }
 
   async uploadFile(beasiswaId, mahasiswaId, file, berkasId) {
@@ -246,11 +252,16 @@ class BeasiswaService {
 
     await BeasiswaModel.updateOne(
       { _id: beasiswaId },
-      { isLocked: isLock }
+      {
+        result: [],
+        isLocked: isLock
+      }
     );
   }
 
   calculationCertaintyFactorScore(...cf) {
+    if (cf.length === 1) return cf[0];
+
     const result = cf.reduce((result, value, index) => {
       if (index === 1) return result;
 
@@ -285,11 +296,18 @@ class BeasiswaService {
     const surveyService = new SurveyService();
     const cfAverageSurvey = await surveyService.getCFAverageSurvey(beasiswaId);
 
+    // console.log(cfAverageSurvey);
+
     const result = peserta.map((item) => {
       const cf = item.data.map((parameter) => parameter.certaintyValue);
       cf.push(cfAverageSurvey[item.mahasiswa.id].cf ?? -1);
 
       const cfScore = this.calculationCertaintyFactorScore(...cf);
+      // if (item.mahasiswa.nim === '1910511009') {
+      //   console.log(item.data);
+      //   console.log(cf);
+      //   console.log(cfScore);
+      // }
 
       return {
         mahasiswa: item.mahasiswa,
@@ -299,7 +317,8 @@ class BeasiswaService {
     .sort((a, b) => b.value - a.value)
     .map((item, index) => ({
       ...item,
-      status: index <= beasiswa.quota
+      value: +item.value,
+      status: index <= beasiswa.quota - 1
         ? item.value > 0.2 ? "diterima" : "ditolak"
         : "ditolak"
     }));

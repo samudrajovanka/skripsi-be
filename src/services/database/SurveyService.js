@@ -60,12 +60,46 @@ class SurveyService {
   }
 
   async getBeasiswaByVerifikatorId(verifikatorId) {
-    const beasiswaRaw = await SurveyModel.find({ user: verifikatorId })
-      .populate("beasiswa")
-      .select("beasiswa");
+    const beasiswaRaw = await SurveyModel.aggregate([
+      { $match: {
+          user: new mongoose.Types.ObjectId(verifikatorId),
+        }
+      },
+      {
+        $group: {
+          _id: "$beasiswa",
+        },
+      },
+      {
+        $lookup: {
+          from: "beasiswas",
+          localField: "_id",
+          foreignField: "_id",
+          as: "beasiswa",
+        },
+      },
+      {
+        $unwind: "$beasiswa",
+      },
+      {
+        $sort: { "beasiswa.createdAt": -1 },
+      },
+      {
+        $project: {
+          _id: 0,
+          beasiswa: 1,
+        },
+      },
+    ]);
 
-    const beasiswa = beasiswaRaw.map((item) => item.beasiswa)
-      .sort((a, b) => b.createdAt - a.createdAt);
+    const beasiswa = beasiswaRaw.map((item) => {
+      const _beasiswa = item.beasiswa;
+
+      _beasiswa.id = _beasiswa._id;
+      delete _beasiswa._id;
+
+      return _beasiswa;
+    });
 
     return beasiswa;
   }
@@ -173,12 +207,13 @@ class SurveyService {
 
   async getCFAverageSurvey(beasiswaId) {
     const averages = await this.getAverageScorePerMahasiswa(beasiswaId);
+    // console.log(averages);
 
     const result = averages.reduce((res, average) => {
       const cfSurvey = Object.entries(cfConvertionSurvey).find((item) => {
         const [, value] = item;
 
-        return average.averageScore >= value.min && average.averageScore <= value.max;
+        return average.averageScore > value.min - 1 && average.averageScore <= value.max;
       });
 
       res[average.mahasiswa] = {
@@ -189,7 +224,16 @@ class SurveyService {
       return res;
     }, {});
 
+    // console.log(result);
+
     return result;
+  }
+
+  async deleteSurveyParticipant (beasiswaId, mahasiswaUsername) {
+    const mahasiswaService = new MahasiswaService();
+    const mahasiswa = await mahasiswaService.getByUsername(mahasiswaUsername);
+
+    await SurveyModel.deleteMany({ beasiswa: beasiswaId, mahasiswa: mahasiswa.id });
   }
 }
 
