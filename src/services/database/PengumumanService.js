@@ -47,7 +47,8 @@ class PengumumanService {
   async getAll({ isActive }) {
     const pengumuman = await PengumumanModel.find({
       isActive: isActive === undefined ? { $ne: null } : isActive
-    });
+    })
+    .sort({ createdAt: -1 });
 
     return pengumuman;
   }

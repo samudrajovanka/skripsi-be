@@ -62,8 +62,16 @@ class PesertaService {
       path: 'mahasiswa',
       select: '-password'
     })
+    .populate({
+      path: 'files',
+      populate: {
+        path: 'berkas',
+        model: 'File'
+      }
+    })
     .populate('data')
     .select('-beasiswa');
+
 
     const participant = participantOnScholarship.filter(
       (participant) => participant.mahasiswa.username === username
