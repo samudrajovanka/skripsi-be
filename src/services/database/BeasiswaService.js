@@ -27,14 +27,14 @@ class BeasiswaService {
     return beasiswa;
   }
 
-  async getByVerifikator(username, id) {
+  async getByPenilai(username, id) {
     const userService = new UserService();
 
     await userService.checkExistByUsername(username);
 
     const surveyService = new SurveyService();
 
-    const beasiswa = await surveyService.getBeasiswaByVerifikatorId(id);
+    const beasiswa = await surveyService.getBeasiswaByPenilaiId(id);
 
     return beasiswa;
   }
@@ -117,20 +117,21 @@ class BeasiswaService {
     return participants;
   }
 
-  async getParticipantsByBeasiswaIdVerifiktor(beasiswaId, verifikatorId) {
+  async getParticipantsByBeasiswaIdPenilai(beasiswaId, penilaiId) {
     await this.checkExistById(beasiswaId);
 
     const pesertaService = new PesertaService();
     const participants = await pesertaService.getByBeasiswaId(beasiswaId);
+    console.log(participants)
 
     const surveyService = new SurveyService();
-    const mahasiswaId = await surveyService.getMahasiswaIdByVerifikatorId(beasiswaId, verifikatorId);
+    const mahasiswaId = await surveyService.getMahasiswaIdByPenilaiId(beasiswaId, penilaiId);
 
-    const participantsByVerifikator = participants.filter((participant) => (
+    const participantsByPenilai = participants.filter((participant) => (
       mahasiswaId.includes(participant.mahasiswa.id)
     ));
 
-    return participantsByVerifikator;
+    return participantsByPenilai;
   }
 
   async addParticipantExistMahasiswa(beasiswaId, { mahasiswaId, mahasiswaNim }) {
@@ -199,7 +200,7 @@ class BeasiswaService {
     await pesertaService.addFileToParticipant(beasiswaId, mahasiswaId, fileData);
   }
 
-  async addVerifikatorToMahasiswa({ username, usernameVerifikator, beasiswaId }) {
+  async addPenilaiToMahasiswa({ username, usernamePenilai, beasiswaId }) {
     await this.checkExistById(beasiswaId);
 
     const mahasiswaService = new MahasiswaService();
@@ -208,12 +209,12 @@ class BeasiswaService {
     const surveyService = new SurveyService();
     await surveyService.add({
       mahasiswaId: mahasiswa.id,
-      usernameVerifikator,
+      usernamePenilai,
       beasiswaId
     });
   }
 
-  async verifikatorGiveScore(username, idVerifikator, beasiswaId, { score }) {
+  async penilaiGiveScore(username, idPenilai, beasiswaId, { score }) {
     await this.checkExistById(beasiswaId);
 
     const beasiswa = await this.getById(beasiswaId);
@@ -227,21 +228,21 @@ class BeasiswaService {
     const surveyService = new SurveyService();
     await surveyService.giveScore(
       mahasiswa.id,
-      idVerifikator,
+      idPenilai,
       beasiswaId,
       { score }
     );
   }
 
-  async deleteVerifikatorSurvey(verifikatorId, username, beasiswaId) {
+  async deletePenilaiSurvey(penilaiId, username, beasiswaId) {
     await this.checkExistById(beasiswaId);
 
     const mahasiswaService = new MahasiswaService();
     const mahasiswa = await mahasiswaService.getByUsername(username);
 
     const surveyService = new SurveyService();
-    await surveyService.deleteVerifikatorSurvey(
-      verifikatorId,
+    await surveyService.deletePenilaiSurvey(
+      penilaiId,
       mahasiswa.id,
       beasiswaId
     );

@@ -45,16 +45,16 @@ exports.addDataValue = Joi.object({
   })).required()
 });
 
-exports.addVerifikatorToMahasiswa = Joi.object({
-  usernameVerifikator: Joi.string().required()
+exports.addPenilaiToMahasiswa = Joi.object({
+  usernamePenilai: Joi.string().required()
 });
 
-exports.verifikatorGiveScore = Joi.object({
+exports.penilaiGiveScore = Joi.object({
   score: Joi.number().required().min(0).max(68)
 });
 
-exports.deleteVerifikatorSurvey = Joi.object({
-  verifikatorId: Joi.string().required()
+exports.deletePenilaiSurvey = Joi.object({
+  penilaiId: Joi.string().required()
 });
 
 exports.updateLockBeasiswa = Joi.object({

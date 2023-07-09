@@ -23,8 +23,8 @@ exports.getAll = async (req, res) => {
       })
     }
 
-    if (role === "verifikator") {
-      const allBeasiswa = await beasiswaService.getByVerifikator(req.user.username, req.user.id);
+    if (role === "penilai") {
+      const allBeasiswa = await beasiswaService.getByPenilai(req.user.username, req.user.id);
       return res.status(200).json({
         success: true,
         message: "Berhasil mendapatkan semua periode beasiswa",
@@ -173,8 +173,8 @@ exports.getParticipantBeasiswa = async (req, res) => {
 
     let participants = [];
 
-    if (req.user.role === "verifikator") {
-      participants = await beasiswaService.getParticipantsByBeasiswaIdVerifiktor(id, req.user.id);
+    if (req.user.role === "penilai") {
+      participants = await beasiswaService.getParticipantsByBeasiswaIdPenilai(id, req.user.id);
     } else {
       participants = await beasiswaService.getParticipantsByBeasiswaId(id);
     }
@@ -289,40 +289,40 @@ exports.addDataValue = async (req, res) => {
   }
 }
 
-exports.addVerifikatorToMahasiswa = async (req, res) => {
+exports.addPenilaiToMahasiswa = async (req, res) => {
   try {
-    beasiswaValidation.validateAddVerifikatorToMahasiswa(req.body);
+    beasiswaValidation.validateaddPenilaiToMahasiswa(req.body);
 
     const { id: beasiswaId, username } = req.params;
 
-    const { usernameVerifikator } = req.body;
+    const { usernamePenilai } = req.body;
 
     const beasiswaService = new BeasiswaService();
-    await beasiswaService.addVerifikatorToMahasiswa({
+    await beasiswaService.addPenilaiToMahasiswa({
       username,
-      usernameVerifikator,
+      usernamePenilai,
       beasiswaId
     });
 
     return res.status(200).json({
       success: true,
-      message: "Berhasil menambahkan verifikator ke mahasiswa"
+      message: "Berhasil menambahkan penilai ke mahasiswa"
     })
   } catch (error) {
     return errorRes(res, error);
   }
 }
 
-exports.verifikatorGiveScore = async (req, res) => {
+exports.penilaiGiveScore = async (req, res) => {
   try {
-    beasiswaValidation.validateVerifikatorGiveScore(req.body);
+    beasiswaValidation.validatepenilaiGiveScore(req.body);
 
     const { id: beasiswaId, username } = req.params;
 
     const { score } = req.body;
 
     const beasiswaService = new BeasiswaService();
-    await beasiswaService.verifikatorGiveScore(
+    await beasiswaService.penilaiGiveScore(
       username,
       req.user.id,
       beasiswaId,
@@ -376,20 +376,20 @@ exports.getSurveysMahasiswa = async (req, res) => {
   }
 }
 
-exports.deleteVerifikatorSurvey = async (req, res) => {
+exports.deletePenilaiSurvey = async (req, res) => {
   try {
-    beasiswaValidation.validateDeleteVerifikatorSurvey(req.body);
+    beasiswaValidation.validatedeletePenilaiSurvey(req.body);
 
     const { id: beasiswaId, username } = req.params;
 
-    const { verifikatorId } = req.body;
+    const { penilaiId } = req.body;
 
     const beasiswaService = new BeasiswaService();
-    await beasiswaService.deleteVerifikatorSurvey(verifikatorId, username, beasiswaId);
+    await beasiswaService.deletePenilaiSurvey(penilaiId, username, beasiswaId);
 
     return res.status(200).json({
       success: true,
-      message: "Berhasil menghapus verifikator survey"
+      message: "Berhasil menghapus penilai survey"
     })
   } catch (error) {
     return errorRes(res, error);

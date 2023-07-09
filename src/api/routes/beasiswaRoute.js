@@ -58,37 +58,37 @@ router.get(
 router.post(
   '/:id/peserta/:username/nilai',
   authentication,
-  authorization(['penilai']),
+  authorization(['verifikator']),
   beasiswaController.addDataValue
 );
 router.post(
-  '/:id/peserta/:username/verifikator',
+  '/:id/peserta/:username/penilai',
   authentication,
   authorization(['admin']),
-  beasiswaController.addVerifikatorToMahasiswa
+  beasiswaController.addPenilaiToMahasiswa
 )
 router.delete(
-  '/:id/peserta/:username/verifikator',
+  '/:id/peserta/:username/penilai',
   authentication,
   authorization(['admin']),
-  beasiswaController.deleteVerifikatorSurvey
+  beasiswaController.deletePenilaiSurvey
 )
 router.get(
   '/:id/survey',
   authentication,
-  authorization(['admin', 'verifikator']),
+  authorization(['admin', 'penilai']),
   beasiswaController.getSurveys
 );
 router.post(
   '/:id/survey/:username',
   authentication,
-  authorization(['verifikator']),
-  beasiswaController.verifikatorGiveScore
+  authorization(['penilai']),
+  beasiswaController.penilaiGiveScore
 );
 router.get(
   '/:id/survey/:username',
   authentication,
-  authorization(['admin', "verifikator"]),
+  authorization(['admin', "penilai"]),
   beasiswaController.getSurveysMahasiswa
 );
 router.get(

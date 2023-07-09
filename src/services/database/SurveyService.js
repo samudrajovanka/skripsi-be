@@ -8,7 +8,7 @@ const UserService = require("./UserService");
 const { cfConvertionSurvey, cfPakarSurvey } = require("../../config/certaintyValueSurvey");
 
 class SurveyService {
-  async checkUserIsVerifikator(username) {
+  async checkUserIsPenilai(username) {
     const userService = new UserService();
     const user = await userService.getByUsername(username);
 
@@ -16,17 +16,17 @@ class SurveyService {
       throw new NotFoundError("User tidak ditemukan");
     }
 
-    if (user.role !== "verifikator") {
-      throw new InvariantError("User bukan verifikator");
+    if (user.role !== "penilai") {
+      throw new InvariantError("User bukan penilai");
     }
 
     return user;
   }
 
-  async checkExistSurvey({ mahasiswaId, verifikatorId, beasiswaId }) {
+  async checkExistSurvey({ mahasiswaId, penilaiId, beasiswaId }) {
     const isExist = await SurveyModel.exists({
       mahasiswa: mahasiswaId,
-      user: verifikatorId,
+      user: penilaiId,
       beasiswa: beasiswaId,
     });
 
@@ -35,22 +35,22 @@ class SurveyService {
     }
   }
 
-  async checkDuplicateSurvey({ mahasiswaId, verifikatorId, beasiswaId }) {
+  async checkDuplicateSurvey({ mahasiswaId, penilaiId, beasiswaId }) {
     const survey = await SurveyModel.findOne({
       mahasiswa: mahasiswaId,
-      user: verifikatorId,
+      user: penilaiId,
       beasiswa: beasiswaId,
     });
 
     if (survey) {
-      throw new InvariantError("Verifikator telah dimasukkan sebelumnya");
+      throw new InvariantError("Penilai telah dimasukkan sebelumnya");
     }
   }
 
-  async add({ mahasiswaId, usernameVerifikator, beasiswaId }) {
-    const user = await this.checkUserIsVerifikator(usernameVerifikator);
+  async add({ mahasiswaId, usernamePenilai, beasiswaId }) {
+    const user = await this.checkUserIsPenilai(usernamePenilai);
     
-    await this.checkDuplicateSurvey({ mahasiswaId, verifikatorId: user.id, beasiswaId });
+    await this.checkDuplicateSurvey({ mahasiswaId, penilaiId: user.id, beasiswaId });
 
     await SurveyModel.create({
       user: user.id,
@@ -59,10 +59,10 @@ class SurveyService {
     });
   }
 
-  async getBeasiswaByVerifikatorId(verifikatorId) {
+  async getBeasiswaByPenilaiId(penilaiId) {
     const beasiswaRaw = await SurveyModel.aggregate([
       { $match: {
-          user: new mongoose.Types.ObjectId(verifikatorId),
+          user: new mongoose.Types.ObjectId(penilaiId),
         }
       },
       {
@@ -104,19 +104,19 @@ class SurveyService {
     return beasiswa;
   }
 
-  async getMahasiswaIdByVerifikatorId(beasiswaId, verifikatorId) {
-    const surveys = await SurveyModel.find({ beasiswa: beasiswaId, user: verifikatorId });
+  async getMahasiswaIdByPenilaiId(beasiswaId, penilaiId) {
+    const surveys = await SurveyModel.find({ beasiswa: beasiswaId, user: penilaiId });
 
-    const mahasiswaIdByVerifikator = surveys.map((item) => item.mahasiswa.toString());
+    const mahasiswaIdByPenilai = surveys.map((item) => item.mahasiswa.toString());
 
-    return mahasiswaIdByVerifikator;
+    return mahasiswaIdByPenilai;
   }
 
-  async giveScore(mahasiswaId, verifikatorId, beasiswaId, { score } ) {
-    await this.checkExistSurvey({ mahasiswaId, verifikatorId, beasiswaId });
+  async giveScore(mahasiswaId, penilaiId, beasiswaId, { score } ) {
+    await this.checkExistSurvey({ mahasiswaId, penilaiId, beasiswaId });
 
     await SurveyModel.updateOne(
-      { mahasiswa: mahasiswaId, user: verifikatorId, beasiswa: beasiswaId },
+      { mahasiswa: mahasiswaId, user: penilaiId, beasiswa: beasiswaId },
       { score }
     );
   }
@@ -141,7 +141,7 @@ class SurveyService {
 
   async getSurveys(user, { beasiswaId }) {
     let surveys = [];
-    if (user.role === 'verifikator') {
+    if (user.role === 'penilai') {
       surveys = await SurveyModel.find({ beasiswa: beasiswaId, user: user.id })
         .populate({
           path: "mahasiswa",
@@ -165,13 +165,15 @@ class SurveyService {
       throw new NotFoundError("Survey tidak ditemukan");
     }
 
+    surveys = surveys.sort((a, b) => +a.mahasiswa.nim - +b.mahasiswa.nim)
+
     return surveys;
   }
 
-  async deleteVerifikatorSurvey(verifikatorId, mahasiswaId, beasiswaId) {
-    await this.checkExistSurvey({ mahasiswaId, verifikatorId, beasiswaId });
+  async deletePenilaiSurvey(penilaiId, mahasiswaId, beasiswaId) {
+    await this.checkExistSurvey({ mahasiswaId, penilaiId, beasiswaId });
 
-    await SurveyModel.deleteOne({ mahasiswa: mahasiswaId, user: verifikatorId, beasiswa: beasiswaId });
+    await SurveyModel.deleteOne({ mahasiswa: mahasiswaId, user: penilaiId, beasiswa: beasiswaId });
   }
 
   async deleteManyByBeasiswaId(beasiswaId) {

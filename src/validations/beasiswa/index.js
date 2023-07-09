@@ -8,9 +8,9 @@ const {
   addParticipantExistMahasiswaSchema,
   uploadFileParticipantSchema,
   addDataValue,
-  addVerifikatorToMahasiswa,
-  verifikatorGiveScore,
-  deleteVerifikatorSurvey,
+  addPenilaiToMahasiswa,
+  penilaiGiveScore,
+  deletePenilaiSurvey,
   updateLockBeasiswa
 } = require('./schema');
 
@@ -57,22 +57,22 @@ const beasiswaValidation = {
       throw new InvariantError(validationResult.error.message, VALIDATION_ERR);
     }
   },
-  validateAddVerifikatorToMahasiswa: (payload) => {
-    const validationResult = addVerifikatorToMahasiswa.validate(payload);
+  validateaddPenilaiToMahasiswa: (payload) => {
+    const validationResult = addPenilaiToMahasiswa.validate(payload);
 
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message, VALIDATION_ERR);
     }
   },
-  validateVerifikatorGiveScore: (payload) => {
-    const validationResult = verifikatorGiveScore.validate(payload);
+  validatepenilaiGiveScore: (payload) => {
+    const validationResult = penilaiGiveScore.validate(payload);
 
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message, VALIDATION_ERR);
     }
   },
-  validateDeleteVerifikatorSurvey: (payload) => {
-    const validationResult = deleteVerifikatorSurvey.validate(payload);
+  validatedeletePenilaiSurvey: (payload) => {
+    const validationResult = deletePenilaiSurvey.validate(payload);
 
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message, VALIDATION_ERR);
